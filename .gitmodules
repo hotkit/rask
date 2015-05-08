@@ -16,3 +16,6 @@
 [submodule "fost-rask"]
 	path = fost-rask
 	url = git@github.com:KayEss/fost-rask.git
+[submodule "fost-orm"]
+	path = fost-orm
+	url = git@github.com:KayEss/fost-orm.git
