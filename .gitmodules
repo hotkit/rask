@@ -13,3 +13,6 @@
 [submodule "fost-internet"]
 	path = fost-internet
 	url = git@github.com:KayEss/fost-internet.git
+[submodule "fost-rask"]
+	path = fost-rask
+	url = git@github.com:KayEss/fost-rask.git
