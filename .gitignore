@@ -1,6 +1,9 @@
 /bjam
 /bjam.run
+/.kdev4
 /boost-build.jam
 /boost-version.jam
+/build.tmp
+/dist
 /python.opts.sh
-
+/rask.kdev4
