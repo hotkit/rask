@@ -1,0 +1,7 @@
+
+fost-exe rask
+    :
+        ../../../fost-base/Cpp/fost-cli
+        ../../../fost-rask/src
+        main.cpp
+    ;

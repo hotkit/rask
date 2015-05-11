@@ -1,0 +1,34 @@
+path-constant TOP : . ;
+include $(TOP)/../boost-version.jam ;
+include ../fost-base/fost.jam ;
+
+use-project fost-base : ../fost-base/ ;
+use-project fost-internet : ../fost-internet/ ;
+use-project fost-orm : ../fost-orm/ ;
+use-project fost-rask : ../fost-rask/ ;
+
+fost-project rask
+    :
+        <include>../fost-internet/Cpp/include
+        <include>../fost-orm/Cpp/include
+        <include>../fost-rask/include
+        <include>include
+    ;
+
+alias fost :
+        ../fost-base//fost
+        ../fost-internet//fost
+        ../fost-orm//fost
+    ;
+explicit fost ;
+
+alias rask  :
+        ../fost-rask/
+        src/rask
+    ;
+
+alias all :
+        rask
+        fost
+    ;
+explicit all ;
