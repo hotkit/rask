@@ -1,0 +1,111 @@
+# Meta-data #
+
+We need to store meta-data about files and directories in a way that all nodes can agree on and we want to be able to quickly determine if there are files that need to be updated.
+
+## The data tree ##
+
+The data is managed through an n-bit tree. At any level node zero represents the aggregate of all nodes below it. The nodes are then numbered in a way that gives a limit to the amount of data. There are three levels:
+
+1. The top-level directories that are managed, called tentants
+2. The file system nodes that are managed (directories and files)
+3. The file data
+
+The tree growth will be limited to 5 bit blocks and all numbers are limited to int64_t (which is the largest integer we can store in a beanbag). Therefore a zero bit tree can store 32 values and a 5 bit tree can store 1024, which is made up of 32 blocks of 32 entries.
+
+For MVP all hashes will be stored in local beanbags. It's expected that these should be on a separate spinning disk to the tenants that are being managed.
+
+## Hashes ##
+
+For each file of interest we are going to generate a hash. We want a fast hashing algorithm with reasonable collision avoidance. The hash will be used to determine if the file contents are correct or not. 256 bit SHA2 should be fine for this purpose.
+
+There are three levels that we care about, corresponding to the three levels of the data tree.
+
+When storing the hashes we will use base 32 so that each character corresponds to one level in the 5 bit tree.
+
+### File hashes ###
+
+The file is broken into data blocks of a fixed size (to be determined, but probably around 32KB).
+
+
+## Sweeps ##
+
+When a new top level directory is published we must perform a sweep to ensure that we have the correct meta-data about all of the files.
+
+
+# Protocol #
+
+We need the protocol to be low overhead and fast. After the initial connection the protocol is totally symmetric -- that is, both sides may initiate a send of data and both sides may make a determination of what to send the other based on the data that they have about the connection.
+
+The protocol is stateful -- that is, each node maintains a view of the state at each other node and sends the data that it judges to be wanted by the other nodes. If data that a node wants isn't actually 
+
+## Initial handshake ##
+
+After the initial connection each host will always send a version block. The minimum common version number is the one that is to be used as that is the highest version number both hosts understand.
+
+
+## Event packets ##
+
+The minimal set of commands that are needed in order to be able to replicate are:
+
+* a hash value block for part of the data tree
+* a data block containing file data
+
+Additional commands allow optimsation. The two nodes that are communicating are trying to achieve the same top level hash. When the top level hashes no longer co-incide then they will exchange hashes of parts of the tree below in order to find parts of the file trees that differ between them so that they can exchange the file data needed to bring them back into sync.
+
+The data packet header consists of a single byte (actually a variable length byte as outlined below) which is then followed by a variable length byte describing the size of the command content.
+
+* 0x80 -- version block
+* 0x81 -- hash values -- a block of 32 SHA2 hash values
+* 0x82 -- data -- a block of data that will go into a file
+
+These are used to allow faster synchronisation by allowing a host to command other hosts to follow change sequences that are picked up through inotify.
+
+* 0x90 -- create file
+* 0x91 -- create directory
+* 0x92 -- truncate file
+* 0x93 -- delete file
+* 0x94 -- rename file
+
+The following byte is always a variable length data byte which contains the length of the whole packet. The packet type alters the embedded data.
+
+
+## Variable length data segment ##
+
+A single byte which represents a data marker. The interpretation of the block depends on the value range:
+
+* 0x00 to 0x7f represent a data block of that many bytes.
+* 0x80 to 0xef command ID numbers.
+* 0xf8 to 0xff the following bytes represent the block size. The length in bytes of the size is the value minus 0xf7.
+
+The data may be byte data (for a data block), or a string (for example in a create file event).
+
+Short data segments thereby have a single byte header. A 200 byte string will have a value of 0xf8 and the next byte will have the value 200. The string content follows for 200 bytes.
+
+A 1024 byte data block will have 0xf9 in the first byte, 0x04 in the next byte and then 0x00. Following this will be the 1024 bytes of data.
+
+
+# Numeric analysis #
+
+Looking at files first and assuming we go with 32KB data block sizes. A file with a bit tree depth of zero can have up to 32 blocks. This allows files up to 1MB in size to be described in a single hash data packet. A file of up to 32MB can now be described in 33 hash packets (one for the top level, and 32 to describe the actual file data). The tree depth is now 5 bits.
+
+Adding an extra byte (so the file is 32MB + 1 byte in size) now increases the depth to 10 bits and we need 36 hash blocks (1 top level, two at the next level, and then 33 to describe the file content) as the top level must always be one hash.
+
+Note that under this scheme the number of files in an entire sub-tree under a top level tracked directory is important, not the number of files at any given level.
+
+The same sort of analysis works at the file level. A top level directory can contain up to 32 entries using a single hash block.
+
+Adding an extra file or directory takes this up to 3 hashes (one for the top level and two to describe the 33 files). We don't need to add another hash until we exceed 64 files, and we grow at one hash block per 32 files until we get to 1024 files. At this point we need to add another level so we get a ten bit depth.
+
+The case for the top level directories is exactly like the one for the tracked files and directories.
+
+We can have up to 9,223,372,036,854,775,807 top level directories with up to the same number of file nodes in them and files of up to that size in bytes. Clearly no physical machines have this capacity.
+
+More realistic numbers based on our MVP are that we wouldn't in practice need more than a handful of tracked top level directories. We want to represent up to about 10,000,000 files in a single top level directory. This is between 26 and 27 bits, so a 30 bit tree depth is sufficient.
+
+This corresponds to 10,000,000 hashes for the individual files, plus 312,500 hashes for the next level of grouping, plus 9,766 for the next level, 306 for the next level 10 for the next level and one for the final level. There are 6 levels here which corresponds to 30 bits of hashes (6 times 5 bits). Total hashes are 10,322,583, which is around 315MB of data.
+
+If files are small (4KB) then each file is fully specified by the existing hashes and no more are needed.  The total file data will be just under 38GB. This gives a hash overhead of less than one percent (about 0.8%). In practice the overhead will be more than this (we need to transport file names as well as file data and hashes), but it's hard to see that in real world use cases it'll be more than two or three times the hash overhead.
+
+If the files are on average larger, say 1.5MB then each file would in addition require 48 hashes for the data and 2 hashes at the next level (the final top level hash is already counted above).
+
+This gives an additional 50,000,000 hashes for a total of 1.8GB of hash data. The total file data size is now 14.3TB so the overhead is about 0.01%.
