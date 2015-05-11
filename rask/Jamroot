@@ -24,6 +24,7 @@ explicit fost ;
 
 alias rask  :
         ../fost-rask/
+        ../fsnotify/examples/
         src/rask
     ;
 
