@@ -15,6 +15,12 @@ fost-project rask
         <include>include
     ;
 
+alias examples :
+        ../fost-rask//examples
+        ../fsnotify//examples
+    ;
+explicit examples ;
+
 alias fost :
         ../fost-base//fost
         ../fost-internet//fost
@@ -23,13 +29,12 @@ alias fost :
 explicit fost ;
 
 alias rask  :
-        ../fost-rask/
-        ../fsnotify/examples/
+        ../fost-rask
         src/rask
     ;
 
 alias all :
-        rask
         fost
+        rask
     ;
 explicit all ;
