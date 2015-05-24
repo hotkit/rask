@@ -50,6 +50,7 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
         loggers = std::make_unique<fostlib::log::global_sink_configuration>(c_logger.value());
     }
     // TODO: Handle extra switches
+    // TODO: Work out server identity
     // Start the threads for doing work
     rask::pool io(4), hashers(2);
     // TODO: Start listening for connections
