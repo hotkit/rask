@@ -3,15 +3,19 @@ include $(TOP)/../boost-version.jam ;
 include ../fost-base/fost.jam ;
 
 use-project fost-base : ../fost-base/ ;
+use-project fost-beanbag : ../fost-beanbag/ ;
 use-project fost-internet : ../fost-internet/ ;
 use-project fost-orm : ../fost-orm/ ;
 use-project fost-rask : ../fost-rask/ ;
+use-project fost-web : ../fost-web/ ;
 
 fost-project rask
     :
+        <include>../fost-beanbag/include
         <include>../fost-internet/Cpp/include
         <include>../fost-orm/Cpp/include
         <include>../fost-rask/include
+        <include>../fost-web/Cpp/include
         <include>include
     ;
 

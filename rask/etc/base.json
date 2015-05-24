@@ -1,0 +1,9 @@
+{
+    "rask": {
+        "tennants": {
+            "name": "tennants",
+            "filepath": "var/lib/rask/tennants.json",
+            "initial": {}
+        }
+    }
+}

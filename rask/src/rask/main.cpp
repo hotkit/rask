@@ -11,6 +11,7 @@
 #include <fost/log>
 #include <fost/main>
 
+#include <rask/tenants.hpp>
 #include <rask/pool.hpp>
 
 
@@ -18,7 +19,9 @@ namespace {
 
 
     const fostlib::setting<fostlib::json> c_logger(
-        "rask/main.cpp", "rask", "logging", fostlib::null, true);
+        "rask/main.cpp", "rask", "logging", fostlib::json(), true);
+    const fostlib::setting<fostlib::json> c_tennant_db(
+        "rask/main.cpp", "rask", "tennants", fostlib::json(), true);
 
     bool webserver(fostlib::http::server::request &req) {
         fostlib::text_body response(
@@ -46,9 +49,17 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
     if ( !c_logger.value().isnull() && c_logger.value().has_key("sinks") ) {
         loggers = std::make_unique<fostlib::log::global_sink_configuration>(c_logger.value());
     }
+    // TODO: Handle extra switches
     // Start the threads for doing work
     rask::pool io(4), hashers(2);
-    fostlib::log::debug("Started Rask");
+    // TODO: Start listening for connections
+    // Load tenants
+    if ( !c_tennant_db.value().isnull() ) {
+        rask::tenants(c_tennant_db.value());
+    }
+    // TODO: Connect to peers
+    // Log that we've started
+    fostlib::log::debug("Started Rask, spinning up web server");
     // Spin up the web server
     fostlib::http::server server(fostlib::host(), 4000);
     server(webserver); // This will never return
