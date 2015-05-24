@@ -8,7 +8,10 @@
 
 #include <fost/main>
 
+#include <rask/pool.hpp>
+
 
 FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
+    rask::pool sockets(4);
     return 0;
 }
