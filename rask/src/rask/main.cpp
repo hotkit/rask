@@ -6,6 +6,8 @@
 */
 
 
+#include <fost/internet>
+#include <fost/http.server.hpp>
 #include <fost/log>
 #include <fost/main>
 
@@ -13,8 +15,20 @@
 
 
 namespace {
+
+
     const fostlib::setting<fostlib::json> c_logger(
         "rask/main.cpp", "rask", "logging", fostlib::null, true);
+
+    bool webserver(fostlib::http::server::request &req) {
+        fostlib::text_body response(
+            fostlib::utf8_string("<html><body>Rask web server</body></html>"),
+            fostlib::mime::mime_headers(), "text/html");
+        req( response );
+        return true;
+    }
+
+
 }
 
 
@@ -25,5 +39,7 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
     }
     rask::pool io(4), hashers(2);
     fostlib::log::debug("Started Rask");
+    fostlib::http::server server(fostlib::host(), 4000);
+    server(webserver);
     return 0;
 }

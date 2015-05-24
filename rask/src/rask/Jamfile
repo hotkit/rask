@@ -4,6 +4,7 @@ fost-exe rask
         $(TOP)/../Boost//boost-iostreams-dll
         ../../../fost-base/Cpp/fost-cli
         ../../../fost-base/Cpp/fost-crypto
+        ../../../fost-internet/Cpp/fost-inet
         ../../../fost-rask/src
         main.cpp
     ;
