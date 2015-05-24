@@ -1,8 +1,8 @@
 {
     "rask": {
-        "tennants": {
-            "name": "tennants",
-            "filepath": "var/lib/rask/tennants.json",
+        "tenants": {
+            "name": "tenants",
+            "filepath": "var/lib/rask/tenants.json",
             "initial": {}
         }
     }

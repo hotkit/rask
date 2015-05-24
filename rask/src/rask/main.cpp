@@ -20,8 +20,8 @@ namespace {
 
     const fostlib::setting<fostlib::json> c_logger(
         "rask/main.cpp", "rask", "logging", fostlib::json(), true);
-    const fostlib::setting<fostlib::json> c_tennant_db(
-        "rask/main.cpp", "rask", "tennants", fostlib::json(), true);
+    const fostlib::setting<fostlib::json> c_tenant_db(
+        "rask/main.cpp", "rask", "tenants", fostlib::json(), true);
 
     bool webserver(fostlib::http::server::request &req) {
         fostlib::text_body response(
@@ -55,8 +55,8 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
     rask::pool io(4), hashers(2);
     // TODO: Start listening for connections
     // Load tenants
-    if ( !c_tennant_db.value().isnull() ) {
-        rask::tenants(c_tennant_db.value());
+    if ( !c_tenant_db.value().isnull() ) {
+        rask::tenants(c_tenant_db.value());
     }
     // TODO: Connect to peers
     // Log that we've started
