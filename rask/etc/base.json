@@ -5,5 +5,16 @@
             "filepath": "var/lib/rask/tenants.json",
             "initial": {}
         }
-    }
+    },
+    "webserver": {
+        "hosts": {"": "rask"},
+        "views": {
+            "rask": {
+                "view": "fost.view.pathprefix",
+                "configuration": {
+                    "": "fost.response.404"
+                }
+            }
+        }
+   }
 }

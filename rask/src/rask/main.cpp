@@ -10,6 +10,7 @@
 #include <fost/http.server.hpp>
 #include <fost/log>
 #include <fost/main>
+#include <fost/urlhandler>
 
 #include <rask/tenants.hpp>
 #include <rask/pool.hpp>
@@ -22,14 +23,6 @@ namespace {
         "rask/main.cpp", "rask", "logging", fostlib::json(), true);
     const fostlib::setting<fostlib::json> c_tenant_db(
         "rask/main.cpp", "rask", "tenants", fostlib::json(), true);
-
-    bool webserver(fostlib::http::server::request &req) {
-        fostlib::text_body response(
-            fostlib::utf8_string("<html><body>Rask web server</body></html>"),
-            fostlib::mime::mime_headers(), "text/html");
-        req( response );
-        return true;
-    }
 
 
 }
@@ -63,6 +56,6 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
     fostlib::log::debug("Started Rask, spinning up web server");
     // Spin up the web server
     fostlib::http::server server(fostlib::host(), 4000);
-    server(webserver); // This will never return
+    server(fostlib::urlhandler::service); // This will never return
     return 0;
 }

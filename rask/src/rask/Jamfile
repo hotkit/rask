@@ -6,5 +6,6 @@ fost-exe rask
         ../../../fost-base/Cpp/fost-crypto
         ../../../fost-internet/Cpp/fost-inet
         ../../../fost-rask/src
+        ../../../fost-web/Cpp/fost-urlhandler
         main.cpp
     ;
