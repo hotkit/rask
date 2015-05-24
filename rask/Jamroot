@@ -30,6 +30,7 @@ explicit fost ;
 
 alias rask  :
         ../fost-rask
+        etc/
         src/rask
     ;
 

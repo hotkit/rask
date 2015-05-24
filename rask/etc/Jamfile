@@ -1,0 +1,6 @@
+install varanus-initial :
+        listener.json
+    :
+        <location>$(PREFIX)/etc/
+    ;
+
