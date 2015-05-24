@@ -23,8 +23,10 @@ explicit examples ;
 
 alias fost :
         ../fost-base//fost
+        ../fost-beanbag//fost
         ../fost-internet//fost
         ../fost-orm//fost
+        ../fost-web//fost
     ;
 explicit fost ;
 
@@ -36,6 +38,7 @@ alias rask  :
     ;
 
 alias all :
+        examples
         fost
         rask
     ;
