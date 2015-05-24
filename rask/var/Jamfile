@@ -1,6 +1,0 @@
-install rask-var :
-        [ glob-tree *.* : Jamfile ]
-    :
-        <location>$(PREFIX)/var
-        <install-source-root>$(TOP)/rask
-    ;
