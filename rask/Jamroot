@@ -32,6 +32,7 @@ alias rask  :
         ../fost-rask
         etc/
         src/rask
+        var/
     ;
 
 alias all :
