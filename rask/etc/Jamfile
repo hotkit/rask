@@ -1,6 +1,6 @@
-install varanus-initial :
-        listener.json
+install rask-etc :
+        [ glob-tree *.* : Jamfile ]
     :
-        <location>$(PREFIX)/etc/
+        <location>$(PREFIX)/etc
+        <install-source-root>$(TOP)/rask
     ;
-
