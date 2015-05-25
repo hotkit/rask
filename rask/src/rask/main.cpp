@@ -37,12 +37,12 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
         out << "Loading config " << filename << std::endl;
         configuration.emplace_back(filename);
     }
+    // TODO: Handle extra switches
     // Set up the logging options
     std::unique_ptr<fostlib::log::global_sink_configuration> loggers;
     if ( !c_logger.value().isnull() && c_logger.value().has_key("sinks") ) {
         loggers = std::make_unique<fostlib::log::global_sink_configuration>(c_logger.value());
     }
-    // TODO: Handle extra switches
     // TODO: Work out server identity
     // Start the threads for doing work
     rask::pool io(4), hashers(2);
