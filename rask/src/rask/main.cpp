@@ -6,6 +6,7 @@
 */
 
 
+#include <beanbag/beanbag>
 #include <fost/internet>
 #include <fost/http.server.hpp>
 #include <fost/log>
@@ -21,6 +22,8 @@ namespace {
 
     const fostlib::setting<fostlib::json> c_logger(
         "rask/main.cpp", "rask", "logging", fostlib::json(), true);
+    const fostlib::setting<fostlib::json> c_server_db(
+        "rask/main.cpp", "rask", "server", fostlib::json(), true);
     const fostlib::setting<fostlib::json> c_tenant_db(
         "rask/main.cpp", "rask", "tenants", fostlib::json(), true);
 
@@ -43,7 +46,22 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
     if ( !c_logger.value().isnull() && c_logger.value().has_key("sinks") ) {
         loggers = std::make_unique<fostlib::log::global_sink_configuration>(c_logger.value());
     }
-    // TODO: Work out server identity
+    // Work out server identity
+    if ( !c_server_db.value().isnull() ) {
+        beanbag::jsondb_ptr dbp(beanbag::database(c_server_db.value()));
+        fostlib::jsondb::local server(*dbp);
+        if ( !server.has_key("identity") ) {
+            uint32_t random = 0;
+            std::ifstream urandom("/dev/urandom");
+            random += urandom.get() << 16;
+            random += urandom.get() << 8;
+            random += urandom.get();
+            random &= (1 << 20) - 1; // Take 20 bits
+            server.set("identity", random);
+            server.commit();
+            fostlib::log::info()("Server identity picked as", random);
+        }
+    }
     // Start the threads for doing work
     rask::pool io(4), hashers(2);
     // TODO: Start listening for connections
