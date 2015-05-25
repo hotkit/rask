@@ -14,7 +14,7 @@
 #include <fost/urlhandler>
 
 #include <rask/tenants.hpp>
-#include <rask/pool.hpp>
+#include <rask/workers.hpp>
 
 
 namespace {
@@ -63,7 +63,7 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
         }
     }
     // Start the threads for doing work
-    rask::pool io(4), hashers(2);
+    rask::workers workers;
     // TODO: Start listening for connections
     // Load tenants
     if ( !c_tenant_db.value().isnull() ) {
