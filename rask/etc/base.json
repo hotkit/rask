@@ -12,7 +12,19 @@
             "rask": {
                 "view": "fost.view.pathprefix",
                 "configuration": {
-                    "": "fost.response.404"
+                    "": "fost.response.404",
+                    "api/tenant/": "tenants"
+                }
+            },
+            "tenants": {
+                "view": "beanbag.raw",
+                "configuration": {
+                    "database": {
+                        "name": "tenants",
+                        "filepath": "var/lib/rask/tenants.json",
+                        "initial": {}
+                    },
+                    "html": {}
                 }
             }
         }
