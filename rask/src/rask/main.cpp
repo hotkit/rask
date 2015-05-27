@@ -65,9 +65,10 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
     // Start the threads for doing work
     rask::workers workers;
     // TODO: Start listening for connections
-    // Load tenants
+    // Load tenants and start sweeping
     if ( !c_tenant_db.value().isnull() ) {
         rask::tenants(workers, c_tenant_db.value());
+        workers.notify(workers);
     }
     // TODO: Connect to peers
     // Log that we've started
