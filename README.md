@@ -12,11 +12,11 @@ We have a number of web application servers serving a web site that includes a f
 * Use a networked file system
 
     We could try to solve this using something like NFS, but there is no good way to make NFS redundant. When the server goes down then we lose the share and all application servers are affected.
-    
+
 * Use rsync in a CRON job
 
     This would be both secure and fast to do the actual file transfers, but the latency would be too high to allow another application server to serve a newly uploaded file.
-    
+
 ## Minimal Viable Product ##
 
 We're aiming for a very limited set of features for the first version so we have just enough to match our motivating use case.
@@ -37,5 +37,6 @@ The MVP will not:
 * It will not try to efficiently send changes to a file.
 * We will not try to optimise memory usage or disk usage for rask.
 * We will not secure the connections between nodes -- they will be neither authenticated or encrypted. If a deployment requires nodes to communicate over a non-trusted and insecure network (e.g. the Internet) the a VPN should be used so the nodes can assume safe transit.
+* We will not support large files on 32 builds.
 
 All of these can be features once the MVP has been released.
