@@ -13,6 +13,7 @@
 #include <fost/main>
 #include <fost/urlhandler>
 
+#include <rask/configuration.hpp>
 #include <rask/peer.hpp>
 #include <rask/server.hpp>
 #include <rask/tenants.hpp>
@@ -24,19 +25,12 @@ namespace {
 
     const fostlib::setting<fostlib::json> c_logger(
         "rask/main.cpp", "rask", "logging", fostlib::json(), true);
-    const fostlib::setting<fostlib::json> c_peers_db(
-        "rask/main.cpp", "rask", "peers", fostlib::json(), true);
-    const fostlib::setting<fostlib::json> c_server_db(
-        "rask/main.cpp", "rask", "server", fostlib::json(), true);
-    const fostlib::setting<fostlib::json> c_tenant_db(
-        "rask/main.cpp", "rask", "tenants", fostlib::json(), true);
-    const fostlib::setting<uint16_t> c_webserver_port(
-        "rask/main.cpp", "rask", "webserver-port", 4000, true);
-
     // Take out the Fost logger configuration so we don't end up with both
     const fostlib::setting<fostlib::json> c_fost_logger(
         "rask/main.cpp", "rask", "Logging sinks", fostlib::json::parse(
             "{\"sinks\":[]}"));
+    const fostlib::setting<uint16_t> c_webserver_port(
+        "rask/main.cpp", "rask", "webserver-port", 4000, true);
 
 
 }
@@ -60,8 +54,8 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
     // Start the threads for doing work
     rask::workers workers;
     // Work out server identity
-    if ( !c_server_db.value().isnull() ) {
-        beanbag::jsondb_ptr dbp(beanbag::database(c_server_db.value()["database"]));
+    if ( !rask::c_server_db.value().isnull() ) {
+        beanbag::jsondb_ptr dbp(beanbag::database(rask::c_server_db.value()["database"]));
         fostlib::jsondb::local server(*dbp);
         if ( !server.has_key("identity") ) {
             uint32_t random = 0;
@@ -75,16 +69,16 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
             fostlib::log::info()("Server identity picked as", random);
         }
         // Start listening for connections
-        rask::listen(workers, c_server_db.value()["socket"]);
+        rask::listen(workers, rask::c_server_db.value()["socket"]);
     }
     // Load tenants and start sweeping
-    if ( !c_tenant_db.value().isnull() ) {
-        rask::tenants(workers, c_tenant_db.value());
+    if ( !rask::c_tenant_db.value().isnull() ) {
+        rask::tenants(workers, rask::c_tenant_db.value());
         workers.notify();
     }
     // Connect to peers
-    if ( !c_peers_db.value().isnull() ) {
-        rask::peer(workers, c_peers_db.value());
+    if ( !rask::c_peers_db.value().isnull() ) {
+        rask::peer(workers, rask::c_peers_db.value());
     }
     // All done, finally start the web server (or whatever)
     if ( c_webserver_port.value() ) {
