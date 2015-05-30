@@ -36,7 +36,7 @@ When a new top level directory is published we must perform a sweep to ensure th
 
 We need the protocol to be low overhead and fast. After the initial connection the protocol is totally symmetric -- that is, both sides may initiate a send of data and both sides may make a determination of what to send the other based on the data that they have about the connection.
 
-The protocol is stateful -- that is, each node maintains a view of the state at each other node and sends the data that it judges to be wanted by the other nodes. If data that a node wants isn't actually 
+The protocol is stateful -- that is, each node maintains a view of the state at each other node and sends the data that it judges to be wanted by the other nodes. If data that a node wants isn't actually
 
 ## Initial handshake ##
 
@@ -73,8 +73,8 @@ The following byte is always a variable length data byte which contains the leng
 
 A single byte which represents a data marker. The interpretation of the block depends on the value range:
 
-* 0x00 to 0x7f represent a data block of that many bytes.
-* 0x80 to 0xef command ID numbers.
+* 0x00 to 0x7f represent a data block of that many bytes. Note that the command block (the following byte) is not counted either.
+* 0x80 to 0xef command ID numbers (see above).
 * 0xf8 to 0xff the following bytes represent the block size. The length in bytes of the size is the value minus 0xf7.
 
 The data may be byte data (for a data block), or a string (for example in a create file event).
