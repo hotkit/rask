@@ -1,16 +1,4 @@
 {
-    "rask": {
-        "server": {
-            "name": "server",
-            "filepath": "var/lib/rask/server.json",
-            "initial": {}
-        },
-        "tenants": {
-            "name": "tenants",
-            "filepath": "var/lib/rask/tenants.json",
-            "initial": {}
-        }
-    },
     "webserver": {
         "hosts": {"": "rask"},
         "views": {
@@ -18,8 +6,20 @@
                 "view": "fost.view.pathprefix",
                 "configuration": {
                     "": "fost.response.404",
+                    "api/peers/": "peers",
                     "api/server/": "server",
                     "api/tenant/": "tenants"
+                }
+            },
+            "peers": {
+                "view": "beanbag.raw",
+                "configuration": {
+                    "database": {
+                        "name": "peers",
+                        "filepath": "var/lib/rask/peers.json",
+                        "initial": {}
+                    },
+                    "html": {}
                 }
             },
             "server": {
