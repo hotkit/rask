@@ -6,7 +6,6 @@
 */
 
 
-#include <beanbag/beanbag>
 #include <fost/internet>
 #include <fost/http.server.hpp>
 #include <fost/log>
@@ -53,24 +52,8 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
     }
     // Start the threads for doing work
     rask::workers workers;
-    // Work out server identity
-    if ( !rask::c_server_db.value().isnull() ) {
-        beanbag::jsondb_ptr dbp(beanbag::database(rask::c_server_db.value()["database"]));
-        fostlib::jsondb::local server(*dbp);
-        if ( !server.has_key("identity") ) {
-            uint32_t random = 0;
-            std::ifstream urandom("/dev/urandom");
-            random += urandom.get() << 16;
-            random += urandom.get() << 8;
-            random += urandom.get();
-            random &= (1 << 20) - 1; // Take 20 bits
-            server.set("identity", random);
-            server.commit();
-            fostlib::log::info()("Server identity picked as", random);
-        }
-        // Start listening for connections
-        rask::listen(workers, rask::c_server_db.value()["socket"]);
-    }
+    // Spin up the Rask server
+    rask::server(workers);
     // Load tenants and start sweeping
     if ( !rask::c_tenant_db.value().isnull() ) {
         rask::tenants(workers, rask::c_tenant_db.value());
