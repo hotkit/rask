@@ -72,8 +72,8 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
         server(fostlib::urlhandler::service); // This will never return
     } else {
         // Log that we're sleeping
-        fostlib::log::warning("Started Rask without a webserver -- sleeping for 10 seconds");
-        sleep(10);
+        fostlib::log::warning("Started Rask without a webserver -- press RETURN to exit");
+        std::cin.get();
     }
     return 0;
 }
