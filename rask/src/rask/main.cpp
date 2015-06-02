@@ -65,7 +65,7 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
             ("", "Started Rask, spinning up web server")
             ("port", c_webserver_port.value());
         // Spin up the web server
-        fostlib::http::server server(fostlib::host(), c_webserver_port.value());
+        fostlib::http::server server(fostlib::host(0), c_webserver_port.value());
         server(fostlib::urlhandler::service); // This will never return
     } else {
         // Log that we're sleeping
