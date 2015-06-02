@@ -4,13 +4,21 @@ We need to store meta-data about files and directories in a way that all nodes c
 
 ## The data tree ##
 
-The data is managed through an n-bit tree. At any level node zero represents the aggregate of all nodes below it. The nodes are then numbered in a way that gives a limit to the amount of data. There are three levels:
+The data is managed through an n-bit tree. The nodes are then numbered in a way that gives a limit to the amount of data. There are three levels:
 
 1. The top-level directories that are managed, called tentants
 2. The file system nodes that are managed (directories and files)
 3. The file data
 
-The tree growth will be limited to 5 bit blocks and all numbers are limited to int64_t (which is the largest integer we can store in a beanbag). Therefore a zero bit tree can store 32 values and a 5 bit tree can store 1024, which is made up of 32 blocks of 32 entries.
+The tree is slightly different for files compared to tenants and file system nodes.
+
+For files it's relatively simple, each file block gets a hash. These are the leaf hashes. Leaves are aggregated into blocks of 32 each which then gives a new hash at the next level. We keep adding leaves and for every 32 hashes we add a new hash at the next level out. When this outer level contains 32 hashes we then open another layer which gets a hash of these hashes, and so on as the leaf hash list grows.
+
+When we've finished hashing the file if the outermost group of hashes contains more than a single hash then these are hashed to give an outermost level with a single hash. This is the hash for the file. Note that this means that for a file of up to a single block in size this hash is always the file hash.
+
+The tree for tenants and file nodes need to deal with names rather than file data. A leaf node contains the names of interest. In order to stop a leaf node from becoming too large it will be split when it crosses the split size threshold. A parent node is created which then contains a number of child nodes. Names are assigned to children based on the hash of their name. This ensures a good distribution of names between hashes. When names are removed they are removed from the leaf nodes as expected. If enough names are removed and the total number of names across all leaves in the parent node falls below the coalescing threshold then the names are brought into a single new leaf node which replaces the parent node.
+
+The split and coalesce thresholds need to be wide enough apart that it doesn't thrash as files are added and removed.
 
 For MVP all hashes will be stored in local beanbags. It's expected that these should be on a separate spinning disk to the tenants that are being managed.
 
@@ -29,7 +37,7 @@ The file is broken into data blocks of a fixed size (to be determined, but proba
 
 ## Sweeps ##
 
-When a new top level directory is published we must perform a sweep to ensure that we have the correct meta-data about all of the files.
+When a new top level directory is published we must perform a sweep to ensure that we have the correct meta-data about all of the files. We also preform a sweep when the rask server loads.
 
 
 # Protocol #
@@ -75,6 +83,7 @@ A single byte which represents a data marker. The interpretation of the block de
 
 * 0x00 to 0x7f represent a data block of that many bytes. Note that the command block (the following byte) is not counted either.
 * 0x80 to 0xef command ID numbers (see above).
+* 0xc0 to 0xf7 various fixed size blocks.
 * 0xf8 to 0xff the following bytes represent the block size. The length in bytes of the size is the value minus 0xf7.
 
 The data may be byte data (for a data block), or a string (for example in a create file event).
