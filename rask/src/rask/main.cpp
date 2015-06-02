@@ -54,11 +54,6 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
     rask::workers workers;
     // Spin up the Rask server
     rask::server(workers);
-    // Load tenants and start sweeping
-    if ( !rask::c_tenant_db.value().isnull() ) {
-        rask::tenants(workers, rask::c_tenant_db.value());
-        workers.notify();
-    }
     // Connect to peers
     if ( !rask::c_peers_db.value().isnull() ) {
         rask::peer(workers, rask::c_peers_db.value());
