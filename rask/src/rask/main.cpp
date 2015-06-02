@@ -61,7 +61,9 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
     // All done, finally start the web server (or whatever)
     if ( c_webserver_port.value() ) {
         // Log that we've started
-        fostlib::log::info("Started Rask, spinning up web server");
+        fostlib::log::info()
+            ("", "Started Rask, spinning up web server")
+            ("port", c_webserver_port.value());
         // Spin up the web server
         fostlib::http::server server(fostlib::host(), c_webserver_port.value());
         server(fostlib::urlhandler::service); // This will never return
