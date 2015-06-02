@@ -63,16 +63,20 @@ Additional commands allow optimsation. The two nodes that are communicating are 
 The data packet header consists of a single byte (actually a variable length byte as outlined below) which is then followed by a variable length byte describing the size of the command content.
 
 * 0x80 -- version block
-* 0x81 -- hash values -- a block of 32 SHA2 hash values
-* 0x82 -- data -- a block of data that will go into a file
+* 0x81 -- hash values for tenants
+* 0x82 -- hash values for files/directories in a tenant
+* 0x83 -- hash values for file data
+* 0x85 -- tenant directory block
+* 0x86 -- files/directories directory block
+* 0x8f -- data -- a block of data that will go into a file
 
 These are used to allow faster synchronisation by allowing a host to command other hosts to follow change sequences that are picked up through inotify.
 
 * 0x90 -- create file
 * 0x91 -- create directory
 * 0x92 -- truncate file
-* 0x93 -- delete file
-* 0x94 -- rename file
+* 0x93 -- delete file/directory
+* 0x94 -- rename file/directory
 
 The following byte is always a variable length data byte which contains the length of the whole packet. The packet type alters the embedded data.
 
@@ -81,10 +85,10 @@ The following byte is always a variable length data byte which contains the leng
 
 A single byte which represents a data marker. The interpretation of the block depends on the value range:
 
-* 0x00 to 0x7f represent a data block of that many bytes. Note that the command block (the following byte) is not counted either.
+* 0x00 to 0x7f represent a data block of that many bytes. Note that the command block (the following byte) is not counted either when the value is used as the packet header.
 * 0x80 to 0xef command ID numbers (see above).
-* 0xc0 to 0xf7 various fixed size blocks.
-* 0xf8 to 0xff the following bytes represent the block size. The length in bytes of the size is the value minus 0xf7.
+* 0xc0 to 0xf8 various fixed size blocks.
+* 0xf9 to 0xff the following bytes represent the block size. The length in bytes of the size is the value minus 0xf8.
 
 The data may be byte data (for a data block), or a string (for example in a create file event).
 
