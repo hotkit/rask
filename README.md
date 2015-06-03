@@ -40,3 +40,9 @@ The MVP will not:
 * We will not support large files on 32 builds.
 
 All of these can be features once the MVP has been released.
+
+
+# Requirements #
+
+* A C++14 compiler. There appears to be a bug in clang 3.6 which breaks shared pointers, but gcc 4.9.2 builds fine.
+* Boost 1.58 -- This is to include Boost Endian used to ensure endianess on the wire is correct.
