@@ -58,7 +58,7 @@ The minimal set of commands that are needed in order to be able to replicate are
 * a hash value block for part of the data tree
 * a data block containing file data
 
-Additional commands allow optimsation. The two nodes that are communicating are trying to achieve the same top level hash. When the top level hashes no longer co-incide then they will exchange hashes of parts of the tree below in order to find parts of the file trees that differ between them so that they can exchange the file data needed to bring them back into sync.
+Additional commands allow optimisation. The two nodes that are communicating are trying to achieve the same top level hash. When the top level hashes no longer coincide then they will exchange hashes of parts of the tree below in order to find parts of the file trees that differ between them so that they can exchange the file data needed to bring them back into sync.
 
 The data packet header consists of a single byte (actually a variable length byte as outlined below) which is then followed by a variable length byte describing the size of the command content.
 
