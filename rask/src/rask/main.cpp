@@ -57,7 +57,7 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
     rask::server(workers);
     // Connect to peers
     if ( !rask::c_peers_db.value().isnull() ) {
-        rask::peer(workers, rask::c_peers_db.value());
+        rask::peer_with(workers, rask::c_peers_db.value());
     }
     // All done, finally start the web server (or whatever)
     if ( c_webserver_port.value() ) {
