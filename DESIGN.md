@@ -46,6 +46,9 @@ We need the protocol to be low overhead and fast. After the initial connection t
 
 The protocol is stateful -- that is, each node maintains a view of the state at each other node and sends the data that it judges to be wanted by the other nodes. If data that a node wants isn't actually
 
+All numbers are sent in network byte order, that is big endian.
+
+
 ## Initial handshake ##
 
 After the initial connection each host will always send a version block. The minimum common version number is the one that is to be used as that is the highest version number both hosts understand.
@@ -63,7 +66,7 @@ Additional commands allow optimisation. The two nodes that are communicating are
 The data packet header consists of a single byte (actually a variable length byte as outlined below) which is then followed by a variable length byte describing the size of the command content.
 
 * 0x80 -- version block
-* 0x81 -- hash values for tenants
+* 0x81 -- tenant details
 * 0x82 -- hash values for files/directories in a tenant
 * 0x83 -- hash values for file data
 * 0x85 -- tenant directory block
@@ -103,6 +106,19 @@ A 1024 byte data block will have 0xf9 in the first byte, 0x04 in the next byte a
 * 32 bits -- (optional) server identity. A unique number used to identity the server. This number is randomly picked when a server first starts, but can be manually set in the server JSON database.
 * 96 bits -- current time. The Lamport clock tick time that the server has.
 * 256 bits -- (optional) server hash. The hash value describing all data that the server has across all nodes.
+
+
+## Tenant packet `0x81` ##
+
+* variable -- tenant name.
+* 256 bits -- tenant hash.
+
+
+## Create directory packet `0x91` ##
+
+* 96 bits -- time. The priority of the directory.
+* variable -- tenant name.
+* variable -- directory name. Relative to the tenant.
 
 
 # Numeric analysis #
