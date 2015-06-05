@@ -44,7 +44,8 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
         out << "Loading config " << filename << std::endl;
         configuration.emplace_back(filename);
     }
-    // TODO: Handle extra switches
+    // Handle extra switches
+    args.commandSwitch("w", c_webserver_port);
     // Set up the logging options
     std::unique_ptr<fostlib::log::global_sink_configuration> loggers;
     if ( !c_logger.value().isnull() && c_logger.value().has_key("sinks") ) {
