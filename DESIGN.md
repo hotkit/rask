@@ -97,6 +97,14 @@ Short data segments thereby have a single byte header. A 200 byte string will ha
 A 1024 byte data block will have 0xf9 in the first byte, 0x04 in the next byte and then 0x00. Following this will be the 1024 bytes of data.
 
 
+## Version packet `0x80` ##
+
+* 8 bits -- version number. The highest protocol version number that this node understands.
+* 32 bits -- (optional) server identity. A unique number used to identity the server. This number is randomly picked when a server first starts, but can be manually set in the server JSON database.
+* 96 bits -- current time. The Lamport clock tick time that the server has.
+* 256 bits -- (optional) server hash. The hash value describing all data that the server has across all nodes.
+
+
 # Numeric analysis #
 
 Looking at files first and assuming we go with 32KB data block sizes. A file with a bit tree depth of zero can have up to 32 blocks. This allows files up to 1MB in size to be described in a single hash data packet. A file of up to 32MB can now be described in 33 hash packets (one for the top level, and 32 to describe the actual file data). The tree depth is now 5 bits.
