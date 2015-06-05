@@ -28,3 +28,6 @@
 [submodule "fost-beanbag"]
 	path = fost-beanbag
 	url = git@github.com:KayEss/fost-beanbag.git
+[submodule "threading"]
+	path = threading
+	url = git@github.com:KayEss/f5-threading.git
