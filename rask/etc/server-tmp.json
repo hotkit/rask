@@ -1,0 +1,39 @@
+{
+    "rask": {
+        "webserver-port": 4001,
+        "server": {
+            "database": {
+                "name": "server",
+                "filepath": "server.json",
+                "initial": {}
+            },
+            "socket": {
+                "bind": "0",
+                "port": 20544
+            }
+        },
+        "tenants": {
+            "name": "tenants",
+            "filepath": "tenants.json",
+            "initial": {
+                "subscription" : {
+                    "t1" : {
+                        "path" : "t1/"
+                    }
+                }
+            }
+        },
+        "peers": {
+            "name": "peers",
+            "filepath": "peers.json",
+            "initial": {
+                "connect": {
+                    "local": {
+                        "host": "localhost",
+                        "port": 20543
+                    }
+                }
+            }
+        }
+    }
+}
