@@ -15,7 +15,7 @@
 #include <rask/configuration.hpp>
 #include <rask/peer.hpp>
 #include <rask/server.hpp>
-#include <rask/tenants.hpp>
+#include <rask/tenant.hpp>
 #include <rask/workers.hpp>
 
 
