@@ -78,8 +78,8 @@ These are used to allow faster synchronisation by allowing a host to command oth
 * 0x90 -- create file
 * 0x91 -- create directory
 * 0x92 -- truncate file
-* 0x93 -- delete file/directory
-* 0x94 -- rename file/directory
+* 0x93 -- move out
+* 0x94 -- move in
 
 The following byte is always a variable length data byte which contains the length of the whole packet. The packet type alters the embedded data.
 
@@ -115,6 +115,13 @@ A 1024 byte data block will have 0xf9 in the first byte, 0x04 in the next byte a
 
 
 ## Create directory packet `0x91` ##
+
+* 96 bits -- time. The priority of the directory.
+* variable -- tenant name.
+* variable -- directory name. Relative to the tenant.
+
+
+## Move inode out `0x93` ##
 
 * 96 bits -- time. The priority of the directory.
 * variable -- tenant name.
