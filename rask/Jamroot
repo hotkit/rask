@@ -1,0 +1,48 @@
+path-constant TOP : . ;
+include $(TOP)/../boost-version.jam ;
+include ../fost-base/fost.jam ;
+
+use-project fost-base : ../fost-base/ ;
+use-project fost-beanbag : ../fost-beanbag/ ;
+use-project fost-internet : ../fost-internet/ ;
+use-project fost-orm : ../fost-orm/ ;
+use-project fost-rask : ../fost-rask/ ;
+use-project fost-web : ../fost-web/ ;
+
+fost-project rask
+    :
+        <include>../fost-beanbag/include
+        <include>../fost-internet/Cpp/include
+        <include>../fost-orm/Cpp/include
+        <include>../fost-rask/include
+        <include>../fost-web/Cpp/include
+        <include>include
+    ;
+
+alias examples :
+        ../fost-rask//examples
+        ../fsnotify//examples
+    ;
+explicit examples ;
+
+alias fost :
+        ../fost-base//fost
+        ../fost-beanbag//fost
+        ../fost-internet//fost
+        ../fost-orm//fost
+        ../fost-web//fost
+    ;
+explicit fost ;
+
+alias rask  :
+        ../fost-rask
+        etc/
+        src/rask
+    ;
+
+alias all :
+        examples
+        fost
+        rask
+    ;
+explicit all ;

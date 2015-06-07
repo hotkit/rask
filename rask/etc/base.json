@@ -1,0 +1,49 @@
+{
+    "webserver": {
+        "hosts": {"": "rask"},
+        "views": {
+            "rask": {
+                "view": "fost.view.pathprefix",
+                "configuration": {
+                    "": "fost.response.404",
+                    "api/peers/": "peers",
+                    "api/server/": "server",
+                    "api/tenant/": "tenants"
+                }
+            },
+            "peers": {
+                "view": "beanbag.raw",
+                "configuration": {
+                    "database": {
+                        "name": "peers",
+                        "filepath": "var/lib/rask/peers.json",
+                        "initial": {}
+                    },
+                    "html": {}
+                }
+            },
+            "server": {
+                "view": "beanbag.raw",
+                "configuration": {
+                    "database": {
+                        "name": "server",
+                        "filepath": "var/lib/rask/server.json",
+                        "initial": {}
+                    },
+                    "html": {}
+                }
+            },
+            "tenants": {
+                "view": "beanbag.raw",
+                "configuration": {
+                    "database": {
+                        "name": "tenants",
+                        "filepath": "var/lib/rask/tenants.json",
+                        "initial": {}
+                    },
+                    "html": {}
+                }
+            }
+        }
+   }
+}

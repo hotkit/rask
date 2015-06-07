@@ -1,0 +1,9 @@
+{
+    "rask": {
+        "peers": {
+            "name": "peers",
+            "filepath": "var/lib/rask/peers.json",
+            "initial": {}
+        }
+    }
+}

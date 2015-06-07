@@ -1,0 +1,20 @@
+{
+    "rask": {
+        "server": {
+            "database": {
+                "name": "server",
+                "filepath": "var/lib/rask/server.json",
+                "initial": {}
+            },
+            "socket": {
+                "bind": "0",
+                "port": 20543
+            }
+        },
+        "tenants": {
+            "name": "tenants",
+            "filepath": "var/lib/rask/tenants.json",
+            "initial": {}
+        }
+    }
+}

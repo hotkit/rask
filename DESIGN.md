@@ -4,13 +4,21 @@ We need to store meta-data about files and directories in a way that all nodes c
 
 ## The data tree ##
 
-The data is managed through an n-bit tree. At any level node zero represents the aggregate of all nodes below it. The nodes are then numbered in a way that gives a limit to the amount of data. There are three levels:
+The data is managed through an n-bit tree. The nodes are then numbered in a way that gives a limit to the amount of data. There are three levels:
 
 1. The top-level directories that are managed, called tentants
 2. The file system nodes that are managed (directories and files)
 3. The file data
 
-The tree growth will be limited to 5 bit blocks and all numbers are limited to int64_t (which is the largest integer we can store in a beanbag). Therefore a zero bit tree can store 32 values and a 5 bit tree can store 1024, which is made up of 32 blocks of 32 entries.
+The tree is slightly different for files compared to tenants and file system nodes.
+
+For files it's relatively simple, each file block gets a hash. These are the leaf hashes. Leaves are aggregated into blocks of 32 each which then gives a new hash at the next level. We keep adding leaves and for every 32 hashes we add a new hash at the next level out. When this outer level contains 32 hashes we then open another layer which gets a hash of these hashes, and so on as the leaf hash list grows.
+
+When we've finished hashing the file if the outermost group of hashes contains more than a single hash then these are hashed to give an outermost level with a single hash. This is the hash for the file. Note that this means that for a file of up to a single block in size this hash is always the file hash.
+
+The tree for tenants and file nodes need to deal with names rather than file data. A leaf node contains the names of interest. In order to stop a leaf node from becoming too large it will be split when it crosses the split size threshold. A parent node is created which then contains a number of child nodes. Names are assigned to children based on the hash of their name. This ensures a good distribution of names between hashes. When names are removed they are removed from the leaf nodes as expected. If enough names are removed and the total number of names across all leaves in the parent node falls below the coalescing threshold then the names are brought into a single new leaf node which replaces the parent node.
+
+The split and coalesce thresholds need to be wide enough apart that it doesn't thrash as files are added and removed.
 
 For MVP all hashes will be stored in local beanbags. It's expected that these should be on a separate spinning disk to the tenants that are being managed.
 
@@ -29,14 +37,17 @@ The file is broken into data blocks of a fixed size (to be determined, but proba
 
 ## Sweeps ##
 
-When a new top level directory is published we must perform a sweep to ensure that we have the correct meta-data about all of the files.
+When a new top level directory is published we must perform a sweep to ensure that we have the correct meta-data about all of the files. We also preform a sweep when the rask server loads.
 
 
 # Protocol #
 
 We need the protocol to be low overhead and fast. After the initial connection the protocol is totally symmetric -- that is, both sides may initiate a send of data and both sides may make a determination of what to send the other based on the data that they have about the connection.
 
-The protocol is stateful -- that is, each node maintains a view of the state at each other node and sends the data that it judges to be wanted by the other nodes. If data that a node wants isn't actually 
+The protocol is stateful -- that is, each node maintains a view of the state at each other node and sends the data that it judges to be wanted by the other nodes. If data that a node wants isn't actually
+
+All numbers are sent in network byte order, that is big endian.
+
 
 ## Initial handshake ##
 
@@ -50,21 +61,25 @@ The minimal set of commands that are needed in order to be able to replicate are
 * a hash value block for part of the data tree
 * a data block containing file data
 
-Additional commands allow optimsation. The two nodes that are communicating are trying to achieve the same top level hash. When the top level hashes no longer co-incide then they will exchange hashes of parts of the tree below in order to find parts of the file trees that differ between them so that they can exchange the file data needed to bring them back into sync.
+Additional commands allow optimisation. The two nodes that are communicating are trying to achieve the same top level hash. When the top level hashes no longer coincide then they will exchange hashes of parts of the tree below in order to find parts of the file trees that differ between them so that they can exchange the file data needed to bring them back into sync.
 
 The data packet header consists of a single byte (actually a variable length byte as outlined below) which is then followed by a variable length byte describing the size of the command content.
 
 * 0x80 -- version block
-* 0x81 -- hash values -- a block of 32 SHA2 hash values
-* 0x82 -- data -- a block of data that will go into a file
+* 0x81 -- tenant details
+* 0x82 -- hash values for files/directories in a tenant
+* 0x83 -- hash values for file data
+* 0x85 -- tenant directory block
+* 0x86 -- files/directories directory block
+* 0x8f -- data -- a block of data that will go into a file
 
 These are used to allow faster synchronisation by allowing a host to command other hosts to follow change sequences that are picked up through inotify.
 
 * 0x90 -- create file
 * 0x91 -- create directory
 * 0x92 -- truncate file
-* 0x93 -- delete file
-* 0x94 -- rename file
+* 0x93 -- move out
+* 0x94 -- move in
 
 The following byte is always a variable length data byte which contains the length of the whole packet. The packet type alters the embedded data.
 
@@ -73,15 +88,44 @@ The following byte is always a variable length data byte which contains the leng
 
 A single byte which represents a data marker. The interpretation of the block depends on the value range:
 
-* 0x00 to 0x7f represent a data block of that many bytes.
-* 0x80 to 0xef command ID numbers.
-* 0xf8 to 0xff the following bytes represent the block size. The length in bytes of the size is the value minus 0xf7.
+* 0x00 to 0x7f represent a data block of that many bytes. Note that the command block (the following byte) is not counted either when the value is used as the packet header.
+* 0x80 to 0xef command ID numbers (see above).
+* 0xc0 to 0xf8 various fixed size blocks.
+* 0xf9 to 0xff the following bytes represent the block size. The length in bytes of the size is the value minus 0xf8.
 
 The data may be byte data (for a data block), or a string (for example in a create file event).
 
 Short data segments thereby have a single byte header. A 200 byte string will have a value of 0xf8 and the next byte will have the value 200. The string content follows for 200 bytes.
 
 A 1024 byte data block will have 0xf9 in the first byte, 0x04 in the next byte and then 0x00. Following this will be the 1024 bytes of data.
+
+
+## Version packet `0x80` ##
+
+* 8 bits -- version number. The highest protocol version number that this node understands.
+* 32 bits -- (optional) server identity. A unique number used to identity the server. This number is randomly picked when a server first starts, but can be manually set in the server JSON database.
+* 96 bits -- current time. The Lamport clock tick time that the server has.
+* 256 bits -- (optional) server hash. The hash value describing all data that the server has across all nodes.
+
+
+## Tenant packet `0x81` ##
+
+* variable -- tenant name.
+* 256 bits -- tenant hash.
+
+
+## Create directory packet `0x91` ##
+
+* 96 bits -- time. The priority of the directory.
+* variable -- tenant name.
+* variable -- directory name. Relative to the tenant.
+
+
+## Move inode out `0x93` ##
+
+* 96 bits -- time. The priority of the directory.
+* variable -- tenant name.
+* variable -- directory name. Relative to the tenant.
 
 
 # Numeric analysis #

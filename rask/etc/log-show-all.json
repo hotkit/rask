@@ -1,0 +1,13 @@
+{
+    "rask": {
+        "logging": {"sinks": [
+            {
+                "name": "stdout",
+                "configuration": {
+                    "log-level": 0,
+                    "color": true
+                }
+            }
+        ]}
+    }
+}
