@@ -6,6 +6,7 @@
 */
 
 
+#include <fost/counter>
 #include <fost/internet>
 #include <fost/http.server.hpp>
 #include <fost/log>
@@ -22,6 +23,9 @@
 namespace {
 
 
+    const fostlib::module c_rask("rask");
+
+
     const fostlib::setting<fostlib::json> c_logger(
         "rask/main.cpp", "rask", "logging", fostlib::json(), true);
     // Take out the Fost logger configuration so we don't end up with both
@@ -30,6 +34,18 @@ namespace {
             "{\"sinks\":[]}"));
     const fostlib::setting<uint16_t> c_webserver_port(
         "rask/main.cpp", "rask", "webserver-port", 4000, true);
+
+
+    void performance(std::shared_ptr<boost::asio::deadline_timer> timer) {
+        timer->expires_from_now(boost::posix_time::seconds(10));
+        timer->async_wait(
+            [timer](const boost::system::error_code &error) {
+                fostlib::log::perf(c_rask, fostlib::performance::current());
+                if ( !error ) {
+                    performance(timer);
+                }
+            });
+    }
 
 
 }
@@ -49,10 +65,15 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
     // Set up the logging options
     std::unique_ptr<fostlib::log::global_sink_configuration> loggers;
     if ( !c_logger.value().isnull() && c_logger.value().has_key("sinks") ) {
-        loggers = std::make_unique<fostlib::log::global_sink_configuration>(c_logger.value());
+        loggers =
+            std::make_unique<fostlib::log::global_sink_configuration>(c_logger.value());
     }
     // Start the threads for doing work
     rask::workers workers;
+    // Capture performance statistics on a regular basis
+    performance(
+        std::make_shared<boost::asio::deadline_timer>(
+            workers.low_latency.io_service));
     // Spin up the Rask server
     rask::server(workers);
     // Connect to peers
