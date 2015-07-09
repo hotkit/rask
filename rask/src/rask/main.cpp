@@ -83,7 +83,7 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
     // All done, finally start the web server (or whatever)
     if ( c_webserver_port.value() ) {
         // Log that we've started
-        fostlib::log::info()
+        fostlib::log::info(c_rask)
             ("", "Started Rask, spinning up web server")
             ("port", c_webserver_port.value());
         // Spin up the web server
@@ -91,7 +91,8 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
         server(fostlib::urlhandler::service); // This will never return
     } else {
         // Log that we're sleeping
-        fostlib::log::warning("Started Rask without a webserver -- press RETURN to exit");
+        fostlib::log::warning(c_rask,
+            "Started Rask without a webserver -- press RETURN to exit");
         std::cin.get();
     }
     return 0;
