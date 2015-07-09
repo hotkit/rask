@@ -4,7 +4,7 @@ fost-exe rask
         $(TOP)/../Boost//boost-iostreams-dll
         ../../../fost-base/Cpp/fost-cli
         ../../../fost-base/Cpp/fost-crypto
-        ../../../fost-beanbag/beanbag-views
+        ../../../fost-beanbag/beanbag
         ../../../fost-internet/Cpp/fost-inet
         ../../../fost-orm/Cpp/fost-jsondb
         ../../../fost-rask/src
