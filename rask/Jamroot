@@ -16,6 +16,7 @@ fost-project rask
         <include>../fost-orm/Cpp/include
         <include>../fost-rask/include
         <include>../fost-web/Cpp/include
+        <include>../threading/include
         <include>include
     ;
 
