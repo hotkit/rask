@@ -15,8 +15,13 @@
         "tenants": {
             "name": "tenants",
             "filepath": "tenants.json",
+            "initial": {}
+        },
+        "subscriptions": {
+            "name": "subscriptions",
+            "filepath": "subscriptions.json",
             "initial": {
-                "subscription" : {
+                "subscription": {
                     "t1" : {
                         "path" : "t1/"
                     }

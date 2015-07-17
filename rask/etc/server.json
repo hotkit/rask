@@ -15,6 +15,11 @@
             "name": "tenants",
             "filepath": "var/lib/rask/tenants.json",
             "initial": {}
+        },
+        "subscriptions": {
+            "name": "subscriptions",
+            "filepath": "var/lib/rask/subscriptions.json",
+            "initial": {}
         }
     }
 }
