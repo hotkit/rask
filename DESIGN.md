@@ -69,9 +69,6 @@ The data packet header consists of a single byte (actually a variable length byt
 * 0x81 -- tenant details
 * 0x82 -- hash values for files/directories in a tenant
 * 0x83 -- hash values for file data
-* 0x85 -- tenant directory block
-* 0x86 -- files/directories directory block
-* 0x8f -- data -- a block of data that will go into a file
 
 These are used to allow faster synchronisation by allowing a host to command other hosts to follow change sequences that are picked up through inotify.
 
@@ -80,6 +77,7 @@ These are used to allow faster synchronisation by allowing a host to command oth
 * 0x92 -- truncate file
 * 0x93 -- move out
 * 0x94 -- move in
+* 0x9f -- data -- a block of data that will go into a file
 
 The following byte is always a variable length data byte which contains the length of the whole packet. The packet type alters the embedded data.
 
@@ -110,22 +108,33 @@ A 1024 byte data block will have 0xf9 in the first byte, 0x04 in the next byte a
 
 ## Tenant packet `0x81` ##
 
-* variable -- tenant name.
+* variable string -- tenant name.
 * 256 bits -- tenant hash.
+
+
+## Tenant hash packet `0x82` ##
+
+* variable string -- tenant name.
+* variable string -- hash prefix. This will be empty for the top level tenant hash. The layer number is always the length of this string.
+* up to 32 copies of:
+    * 8 bits:
+        * least significant 5 bits -- hash suffix
+        * most significant 3 bits -- zero
+    * 256 bits -- hash value for the sub-part
 
 
 ## Create directory packet `0x91` ##
 
 * 96 bits -- time. The priority of the directory.
 * variable -- tenant name.
-* variable -- directory name. Relative to the tenant.
+* variable -- directory name. Relative to the tenant root.
 
 
 ## Move inode out `0x93` ##
 
 * 96 bits -- time. The priority of the directory.
 * variable -- tenant name.
-* variable -- directory name. Relative to the tenant.
+* variable -- directory name. Relative to the tenant root.
 
 
 # Numeric analysis #
