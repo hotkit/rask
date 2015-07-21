@@ -73,7 +73,7 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
     // Capture performance statistics on a regular basis
     performance(
         std::make_shared<boost::asio::deadline_timer>(
-            workers.low_latency.get_io_service()));
+            workers.io.get_io_service()));
     // Spin up the Rask server
     rask::server(workers);
     // Connect to peers
