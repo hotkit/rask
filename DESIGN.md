@@ -32,7 +32,7 @@ When storing the hashes we will use base 32 so that each character corresponds t
 
 ### File hashes ###
 
-The file is broken into data blocks of a fixed size (to be determined, but probably around 32KB).
+The file is broken into data blocks of a fixed size (to be determined, but probably around 32KB). These are then grouped into blocks of 1024. These are also grouped into 32KB chunks until we get a layer (which could be the raw file data) that is below 32KB so it's entire content can be expressed by a single hash. This final hash becomes the file hash that is embedded in the inode structure.
 
 
 ## Sweeps ##
@@ -68,11 +68,12 @@ The data packet header consists of a single byte (actually a variable length byt
 * 0x80 -- version block
 * 0x81 -- tenant details
 * 0x82 -- hash values for files/directories in a tenant
-* 0x83 -- hash values for file data
+* 0x83 -- hash values for file data (without priority)
+* 0x84 -- hash values for file data (with prioirty)
 
 These are used to allow faster synchronisation by allowing a host to command other hosts to follow change sequences that are picked up through inotify.
 
-* 0x90 -- create file
+* 0x90 -- file exists
 * 0x91 -- create directory
 * 0x92 -- truncate file
 * 0x93 -- move out
@@ -123,6 +124,33 @@ A 1024 byte data block will have 0xf9 in the first byte, 0x04 in the next byte a
     * 256 bits -- hash value for the sub-part
 
 
+## File hash packet without priority `0x83` ##
+
+* variable string -- tenant name.
+* variable string -- file name. Relative to the tenant root.
+
+
+## File hash packet with priority `0x84` ##
+
+* 96 bits -- time. The priority of the hash data
+* variable string -- tenant name.
+* variable string -- file name. Relative to the tenant root.
+
+
+## File exists packet `0x90` ##
+
+* 96 bits -- time. The priority of the file existence.
+* variable -- tenant name.
+* variable -- file name. Relative to the tenant root.
+* 64 bits -- (optional) file size in bytes.
+    * The most significant bit is always zero, giving a maximum file size of 7 EiB (I think). I.e. 63 bits of data are in the least significant bits with one bit of zero padding at the top.
+* 256 bits -- (optional) hash value for the whole file content.
+
+This packet does nothing other than ensure that a file exists. It does not signify anything about the file content at all (the content hash notwithstanding).
+
+This packet can only be sent by a host that believes that it has the full correct version of the file due to the requirement to have a clock tick for the prority field.
+
+
 ## Create directory packet `0x91` ##
 
 * 96 bits -- time. The priority of the directory.
@@ -135,6 +163,16 @@ A 1024 byte data block will have 0xf9 in the first byte, 0x04 in the next byte a
 * 96 bits -- time. The priority of the directory.
 * variable -- tenant name.
 * variable -- directory name. Relative to the tenant root.
+
+
+## File data block `0x9f` ##
+
+* 96 bits -- time. The priority of the file data.
+* variable -- tenant name.
+* variable -- file path name. Relative to the tenant root.
+* 64 bits -- byte offset. The offset of where this data block belongs.
+* 256 bits -- SHA256 hash of the block data
+* variable -- data bytes up to 32KB. All but the last block are always 32KB.
 
 
 # Numeric analysis #
