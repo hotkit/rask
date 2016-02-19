@@ -31,3 +31,6 @@
 [submodule "threading"]
 	path = threading
 	url = git@github.com:KayEss/f5-threading.git
+[submodule "tamarind"]
+	path = tamarind
+	url = git@github.com:KayEss/f5-tamarind.git
