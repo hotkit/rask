@@ -34,3 +34,6 @@
 [submodule "tamarind"]
 	path = tamarind
 	url = git@github.com:KayEss/f5-tamarind.git
+[submodule "cord"]
+	path = cord
+	url = git@github.com:KayEss/f5-cord.git
