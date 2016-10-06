@@ -1,4 +1,7 @@
 {
+    "JSON DB": {
+        "Pretty print database files": true
+    },
     "webserver": {
         "hosts": {"": "rask"},
         "views": {

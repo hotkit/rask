@@ -36,6 +36,15 @@ alias fost :
     ;
 explicit fost ;
 
+alias tests :
+        ../fost-base//tests
+        ../fost-beanbag//tests
+        ../fost-internet//tests
+        ../fost-orm//tests
+        ../fost-web/tests
+    ;
+explicit tests ;
+
 alias rask  :
         ../fost-rask
         etc/
@@ -46,5 +55,6 @@ alias all :
         examples
         fost
         rask
+        tests
     ;
 explicit all ;
