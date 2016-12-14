@@ -1,5 +1,5 @@
 /*
-    Copyright 2015, Proteus Tech Co Ltd. http://www.kirit.com/Rask
+    Copyright 2015-2016, Proteus Tech Co Ltd. http://www.kirit.com/Rask
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -18,6 +18,8 @@
 #include <rask/server.hpp>
 #include <rask/tenant.hpp>
 #include <rask/workers.hpp>
+
+#include <sys/resource.h>
 
 
 namespace {
@@ -52,6 +54,13 @@ namespace {
 
 
 FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
+    // Set the file open handles limit up to 20K
+    {
+        rlimit limits;
+        getrlimit(RLIMIT_NOFILE, &limits);
+        limits.rlim_cur = 20480;
+        setrlimit(RLIMIT_NOFILE, &limits);
+    }
     // Load the configuration files we've been given on the command line
     std::vector<fostlib::settings> configuration;
     configuration.reserve(args.size());
@@ -62,6 +71,7 @@ FSL_MAIN("rask", "Rask")(fostlib::ostream &out, fostlib::arguments &args) {
     }
     // Handle extra switches
     args.commandSwitch("w", c_webserver_port);
+    args.commandSwitch("es", rask::c_exit_on_sync_success);
     // Set up the logging options
     std::unique_ptr<fostlib::log::global_sink_configuration> loggers;
     if ( !c_logger.value().isnull() && c_logger.value().has_key("sinks") ) {
